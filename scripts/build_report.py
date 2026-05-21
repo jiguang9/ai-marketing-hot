@@ -138,7 +138,7 @@ def build_action_checklist(items: list) -> list[str]:
         action = item.get("recommended_action", "")
         title = item.get("title", "")[:30]
         if action:
-            actions.append(f"- [ ] {action}（来自：{title}…）")
+            actions.append(f"[ ] {action}（来自：{title}…）")
     return actions
 
 
