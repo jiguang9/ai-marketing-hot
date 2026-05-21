@@ -1,0 +1,164 @@
+# AI 营销热点数据源配置
+# type: api | rss | html (html 为 V2 预留，V1 仅处理 api 和 rss)
+# priority: 1=最高, 3=最低
+# categories: 该源主要覆盖的营销分类
+
+sources:
+  # ─── 第一层：AI 行业源 ───────────────────────────────────────────
+  - name: "AI HOT API"
+    type: api
+    url: "https://aihot.virxact.com/api/public/items"
+    enabled: true
+    priority: 1
+    categories: [platform_changes, tools_launches, seo_aeo]
+    notes: "主力 AI 行业动态源，由 fetch_aihot.py 单独处理，不走本文件"
+
+  # ─── 第二层：营销平台官方源 ──────────────────────────────────────
+  - name: "Google Ads Blog"
+    type: rss
+    url: "https://blog.google/products/ads/rss/"
+    enabled: true
+    priority: 1
+    categories: [platform_changes, paid_ads, seo_aeo]
+
+  - name: "Google Search Central Blog"
+    type: rss
+    url: "https://developers.google.com/search/blog/rss.xml"
+    enabled: true
+    priority: 1
+    categories: [seo_aeo, platform_changes]
+
+  - name: "Meta for Business"
+    type: rss
+    url: "https://www.facebook.com/business/news/rss/"
+    enabled: false
+    priority: 1
+    categories: [platform_changes, paid_ads, social_growth]
+    notes: "Meta 官方无稳定 RSS，V1 暂禁用，V2 改用 HTML 抓取"
+
+  - name: "TikTok Business Blog"
+    type: rss
+    url: "https://www.tiktok.com/business/en-US/blog/rss"
+    enabled: false
+    priority: 1
+    categories: [platform_changes, social_growth, creator_influencer, ecommerce]
+    notes: "TikTok RSS 不稳定，V2 改用 HTML"
+
+  - name: "LinkedIn Marketing Blog"
+    type: rss
+    url: "https://business.linkedin.com/marketing-solutions/blog/rss"
+    enabled: false
+    priority: 2
+    categories: [social_growth, paid_ads, brand_campaigns]
+    notes: "LinkedIn 无公开 RSS，预留"
+
+  - name: "HubSpot Marketing Blog"
+    type: rss
+    url: "https://blog.hubspot.com/marketing/rss.xml"
+    enabled: true
+    priority: 2
+    categories: [content_creative, crm_martech, seo_aeo, research_insight]
+
+  - name: "Shopify Blog"
+    type: rss
+    url: "https://www.shopify.com/blog.atom"
+    enabled: true
+    priority: 2
+    categories: [ecommerce, tools_launches, brand_campaigns]
+
+  - name: "Adobe Blog"
+    type: rss
+    url: "https://blog.adobe.com/en/feed"
+    enabled: true
+    priority: 2
+    categories: [content_creative, tools_launches, crm_martech]
+
+  - name: "Canva Newsroom"
+    type: html
+    url: "https://www.canva.com/newsroom/"
+    enabled: false
+    priority: 2
+    categories: [tools_launches, content_creative]
+    notes: "无 RSS，V2 实现 HTML 抓取"
+
+  - name: "Salesforce Marketing Cloud Blog"
+    type: rss
+    url: "https://www.salesforce.com/blog/category/marketing/feed/"
+    enabled: true
+    priority: 2
+    categories: [crm_martech, tools_launches, research_insight]
+
+  - name: "Klaviyo Blog"
+    type: rss
+    url: "https://www.klaviyo.com/blog/rss"
+    enabled: false
+    priority: 3
+    categories: [crm_martech, ecommerce]
+    notes: "Klaviyo RSS 可用性待验证"
+
+  # ─── 第三层：行业媒体源 ──────────────────────────────────────────
+  - name: "Search Engine Land"
+    type: rss
+    url: "https://searchengineland.com/feed"
+    enabled: true
+    priority: 1
+    categories: [seo_aeo, paid_ads, platform_changes]
+
+  - name: "Marketing Brew"
+    type: rss
+    url: "https://www.marketingbrew.com/feed.rss"
+    enabled: false
+    priority: 2
+    categories: [brand_campaigns, platform_changes, research_insight]
+    notes: "Newsletter 为主，RSS 可用性待验证"
+
+  - name: "Adweek"
+    type: rss
+    url: "https://www.adweek.com/feed/"
+    enabled: true
+    priority: 2
+    categories: [brand_campaigns, paid_ads, creator_influencer]
+
+  - name: "Social Media Today"
+    type: rss
+    url: "https://www.socialmediatoday.com/rss/rss_feed.xml"
+    enabled: true
+    priority: 2
+    categories: [social_growth, platform_changes, creator_influencer]
+
+  - name: "The Drum"
+    type: rss
+    url: "https://www.thedrum.com/rss"
+    enabled: true
+    priority: 2
+    categories: [brand_campaigns, content_creative, research_insight]
+
+  - name: "MarTech.org"
+    type: rss
+    url: "https://martech.org/feed/"
+    enabled: true
+    priority: 2
+    categories: [crm_martech, tools_launches, research_insight]
+
+  - name: "Think with Google"
+    type: html
+    url: "https://www.thinkwithgoogle.com/intl/en-apac/"
+    enabled: false
+    priority: 2
+    categories: [research_insight, seo_aeo, paid_ads]
+    notes: "无公开 RSS，V2 实现 HTML 抓取"
+
+  - name: "Search Engine Journal"
+    type: rss
+    url: "https://www.searchenginejournal.com/feed/"
+    enabled: true
+    priority: 2
+    categories: [seo_aeo, paid_ads, content_creative]
+
+  # ─── 预留：中文源（V1.1）────────────────────────────────────────
+  # - name: "增长黑盒"
+  # - name: "刀法研究所"
+  # - name: "品牌星球"
+  # - name: "鸟哥笔记"
+  # - name: "运营研究社"
+  # - name: "Morketing"
