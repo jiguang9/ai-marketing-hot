@@ -2,6 +2,10 @@
 # type: api | rss | html (html 为 V2 预留，V1 仅处理 api 和 rss)
 # priority: 1=最高, 3=最低
 # categories: 该源主要覆盖的营销分类
+# enabled: 仅设为 true 的 rss 源会被 fetch_sources.py 拉取
+#
+# 可用性验证日期：2026-05-22
+# 测试方法：带浏览器 UA 的 HTTP HEAD/GET，检查是否返回有效 XML
 
 sources:
   # ─── 第一层：AI 行业源 ───────────────────────────────────────────
@@ -14,19 +18,29 @@ sources:
     notes: "主力 AI 行业动态源，由 fetch_aihot.py 单独处理，不走本文件"
 
   # ─── 第二层：营销平台官方源 ──────────────────────────────────────
-  - name: "Google Ads Blog"
+  - name: "Google Blog (The Keyword)"
     type: rss
-    url: "https://blog.google/products/ads/rss/"
+    url: "https://blog.google/rss/"
     enabled: true
     priority: 1
     categories: [platform_changes, paid_ads, seo_aeo]
+    notes: "Google 全产品官方博客，覆盖 Ads / Search / AI 动态。原 /products/ads/rss/ 已 404"
 
-  - name: "Google Search Central Blog"
+  - name: "Google Ads Blog (deprecated)"
+    type: rss
+    url: "https://blog.google/products/ads/rss/"
+    enabled: false
+    priority: 1
+    categories: [platform_changes, paid_ads]
+    notes: "404 已停用，替换为 blog.google/rss/"
+
+  - name: "Google Search Central Blog (deprecated)"
     type: rss
     url: "https://developers.google.com/search/blog/rss.xml"
-    enabled: true
+    enabled: false
     priority: 1
     categories: [seo_aeo, platform_changes]
+    notes: "404 已停用，搜索动态通过 Google Blog 覆盖"
 
   - name: "Meta for Business"
     type: rss
@@ -34,7 +48,7 @@ sources:
     enabled: false
     priority: 1
     categories: [platform_changes, paid_ads, social_growth]
-    notes: "Meta 官方无稳定 RSS，V1 暂禁用，V2 改用 HTML 抓取"
+    notes: "无稳定 RSS，V2 改用 HTML 抓取"
 
   - name: "TikTok Business Blog"
     type: rss
@@ -42,7 +56,7 @@ sources:
     enabled: false
     priority: 1
     categories: [platform_changes, social_growth, creator_influencer, ecommerce]
-    notes: "TikTok RSS 不稳定，V2 改用 HTML"
+    notes: "RSS 不稳定，V2 改用 HTML"
 
   - name: "LinkedIn Marketing Blog"
     type: rss
@@ -50,7 +64,7 @@ sources:
     enabled: false
     priority: 2
     categories: [social_growth, paid_ads, brand_campaigns]
-    notes: "LinkedIn 无公开 RSS，预留"
+    notes: "无公开 RSS，预留"
 
   - name: "HubSpot Marketing Blog"
     type: rss
@@ -58,20 +72,23 @@ sources:
     enabled: true
     priority: 2
     categories: [content_creative, crm_martech, seo_aeo, research_insight]
+    notes: "验证可用，响应正常"
 
   - name: "Shopify Blog"
     type: rss
     url: "https://www.shopify.com/blog.atom"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [ecommerce, tools_launches, brand_campaigns]
+    notes: "返回 HTML 页面而非 XML，feed 地址已失效"
 
   - name: "Adobe Blog"
     type: rss
     url: "https://blog.adobe.com/en/feed"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [content_creative, tools_launches, crm_martech]
+    notes: "404 已停用"
 
   - name: "Canva Newsroom"
     type: html
@@ -87,6 +104,7 @@ sources:
     enabled: true
     priority: 2
     categories: [crm_martech, tools_launches, research_insight]
+    notes: "验证可用，返回有效 RSS XML"
 
   - name: "Klaviyo Blog"
     type: rss
@@ -94,15 +112,16 @@ sources:
     enabled: false
     priority: 3
     categories: [crm_martech, ecommerce]
-    notes: "Klaviyo RSS 可用性待验证"
+    notes: "可用性待验证"
 
   # ─── 第三层：行业媒体源 ──────────────────────────────────────────
   - name: "Search Engine Land"
     type: rss
     url: "https://searchengineland.com/feed"
-    enabled: true
+    enabled: false
     priority: 1
     categories: [seo_aeo, paid_ads, platform_changes]
+    notes: "403 Forbidden，已停用"
 
   - name: "Marketing Brew"
     type: rss
@@ -118,27 +137,31 @@ sources:
     enabled: true
     priority: 2
     categories: [brand_campaigns, paid_ads, creator_influencer]
+    notes: "验证可用，返回有效 RSS XML"
 
   - name: "Social Media Today"
     type: rss
     url: "https://www.socialmediatoday.com/rss/rss_feed.xml"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [social_growth, platform_changes, creator_influencer]
+    notes: "404 已停用"
 
   - name: "The Drum"
     type: rss
     url: "https://www.thedrum.com/rss"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [brand_campaigns, content_creative, research_insight]
+    notes: "404 已停用"
 
   - name: "MarTech.org"
     type: rss
     url: "https://martech.org/feed/"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [crm_martech, tools_launches, research_insight]
+    notes: "403 Forbidden，已停用"
 
   - name: "Think with Google"
     type: html
@@ -154,6 +177,7 @@ sources:
     enabled: true
     priority: 2
     categories: [seo_aeo, paid_ads, content_creative]
+    notes: "验证可用，返回有效 RSS XML"
 
   # ─── 预留：中文源（V1.1）────────────────────────────────────────
   # - name: "增长黑盒"

@@ -47,9 +47,11 @@ python scripts/rank_items.py /tmp/aihot_raw.json /tmp/sources_raw.json > /tmp/ra
 python scripts/build_report.py --input /tmp/ranked.json --mode daily
 ```
 
-平台专题模式示例：
+平台专题模式示例（以 Google 为例）：
 ```bash
 python scripts/fetch_aihot.py --since-hours 168 --query "Google Ads" > /tmp/aihot_raw.json
+python scripts/fetch_sources.py --since-hours 168 > /tmp/sources_raw.json
+python scripts/rank_items.py /tmp/aihot_raw.json /tmp/sources_raw.json > /tmp/ranked.json
 python scripts/build_report.py --input /tmp/ranked.json --mode platform --platform "Google"
 ```
 
