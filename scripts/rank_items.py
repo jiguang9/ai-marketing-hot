@@ -110,6 +110,20 @@ IMPACT_TEMPLATES: dict[str, str] = {
     "tools_launches": "新工具发布，评估是否能提升现有工作流效率",
 }
 
+AUDIENCE_MAP: dict[str, str] = {
+    "platform_changes":  "投放团队、SEO 团队、运营总监",
+    "seo_aeo":           "SEO 团队、内容团队、品牌方",
+    "paid_ads":          "投放团队、绩效营销团队",
+    "content_creative":  "内容团队、创意团队、品牌方",
+    "social_growth":     "社媒团队、品牌方、增长团队",
+    "ecommerce":         "电商团队、出海团队、DTC 品牌",
+    "crm_martech":       "运营团队、B2B SaaS、营销技术负责人",
+    "brand_campaigns":   "品牌方、营销总监、创意总监",
+    "creator_influencer":"品牌方、电商团队、社媒团队",
+    "research_insight":  "营销总监、策略团队、CMO",
+    "tools_launches":    "所有营销团队",
+}
+
 ACTION_TEMPLATES: dict[str, str] = {
     "platform_changes": "立即检查现有广告账户是否受影响，更新投放策略",
     "seo_aeo": "审查现有内容是否符合 AI 搜索优化要求，补充结构化数据",
@@ -295,6 +309,7 @@ def enrich(item: dict) -> dict:
     item["priority"] = priority
     item["impact"] = IMPACT_TEMPLATES.get(primary_cat, "待评估营销影响")
     item["recommended_action"] = ACTION_TEMPLATES.get(primary_cat, "进一步研究后确定行动方向")
+    item["audience"] = AUDIENCE_MAP.get(primary_cat, "所有营销团队")
     return item
 
 

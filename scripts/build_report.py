@@ -60,6 +60,7 @@ def render_item(item: dict, index: int) -> str:
     score = item.get("marketing_score", 0)
     impact = item.get("impact", "待评估")
     action = item.get("recommended_action", "待确定")
+    audience = item.get("audience", "所有营销团队")
     url = item.get("url", "")
     summary = item.get("summary", "")
 
@@ -71,6 +72,7 @@ def render_item(item: dict, index: int) -> str:
     lines.append(f"- **分类**：{cat_str}")
     lines.append(f"- **营销影响**：{impact}")
     lines.append(f"- **建议动作**：{action}")
+    lines.append(f"- **适合谁**：{audience}")
     if url:
         lines.append(f"- **原文**：[查看原文]({url})")
     return "\n".join(lines)
