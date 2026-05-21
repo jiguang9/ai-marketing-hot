@@ -15,15 +15,16 @@ sources:
 
   # ─── 第二层：营销平台官方源 ──────────────────────────────────────
   - name: "Google Ads Blog"
-    type: rss
-    url: "https://blog.google/products/ads/rss/"
-    enabled: true
+    type: html
+    url: "https://blog.google/products/ads-commerce/"
+    enabled: false
     priority: 1
     categories: [platform_changes, paid_ads, seo_aeo]
+    notes: "官方页面无稳定 RSS，V2 改用 HTML 抓取"
 
   - name: "Google Search Central Blog"
     type: rss
-    url: "https://developers.google.com/search/blog/rss.xml"
+    url: "https://feeds.feedburner.com/blogspot/amDG"
     enabled: true
     priority: 1
     categories: [seo_aeo, platform_changes]
@@ -55,23 +56,26 @@ sources:
   - name: "HubSpot Marketing Blog"
     type: rss
     url: "https://blog.hubspot.com/marketing/rss.xml"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [content_creative, crm_martech, seo_aeo, research_insight]
+    notes: "2026-05 验证可返回高质量内容，但当前网络下响应慢，默认关闭"
 
   - name: "Shopify Blog"
     type: rss
     url: "https://www.shopify.com/blog.atom"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [ecommerce, tools_launches, brand_campaigns]
+    notes: "2026-05 验证返回非标准 XML，V2 改用 HTML 或指定 blog Atom"
 
   - name: "Adobe Blog"
-    type: rss
-    url: "https://blog.adobe.com/en/feed"
-    enabled: true
+    type: html
+    url: "https://blog.adobe.com/en"
+    enabled: false
     priority: 2
     categories: [content_creative, tools_launches, crm_martech]
+    notes: "官方页面无稳定 RSS，V2 改用 HTML 抓取"
 
   - name: "Canva Newsroom"
     type: html
@@ -100,9 +104,10 @@ sources:
   - name: "Search Engine Land"
     type: rss
     url: "https://searchengineland.com/feed"
-    enabled: true
+    enabled: false
     priority: 1
     categories: [seo_aeo, paid_ads, platform_changes]
+    notes: "2026-05 验证对脚本请求返回 403，暂禁用"
 
   - name: "Marketing Brew"
     type: rss
@@ -122,23 +127,26 @@ sources:
   - name: "Social Media Today"
     type: rss
     url: "https://www.socialmediatoday.com/rss/rss_feed.xml"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [social_growth, platform_changes, creator_influencer]
+    notes: "2026-05 验证返回 404，暂禁用"
 
   - name: "The Drum"
     type: rss
     url: "https://www.thedrum.com/rss"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [brand_campaigns, content_creative, research_insight]
+    notes: "2026-05 验证返回 404，暂禁用"
 
   - name: "MarTech.org"
     type: rss
     url: "https://martech.org/feed/"
-    enabled: true
+    enabled: false
     priority: 2
     categories: [crm_martech, tools_launches, research_insight]
+    notes: "2026-05 验证对脚本请求返回 403，暂禁用"
 
   - name: "Think with Google"
     type: html

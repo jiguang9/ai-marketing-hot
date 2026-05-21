@@ -10,11 +10,13 @@ import sys
 import argparse
 import re
 import os
+import html
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 from datetime import datetime, timezone, timedelta
 from xml.etree import ElementTree as ET
 from email.utils import parsedate_to_datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -116,7 +118,7 @@ def is_within_hours(date_str: str, hours: int) -> bool:
 def strip_html(text: str) -> str:
     text = re.sub(r"<[^>]+>", " ", text or "")
     text = re.sub(r"\s+", " ", text)
-    return text.strip()
+    return html.unescape(text.strip())
 
 
 # ---------------------------------------------------------------------------
@@ -160,9 +162,9 @@ def parse_feed(content: bytes, source_name: str) -> list:
 
 def _make_item(title, summary, url, source, published_at) -> dict:
     return {
-        "title": title,
-        "summary": summary,
-        "url": url,
+        "title": html.unescape(title),
+        "summary": html.unescape(summary),
+        "url": html.unescape(url),
         "source": source,
         "published_at": published_at,
         "raw_category": "rss",
@@ -214,6 +216,7 @@ def main():
         "--sources-file",
         default=os.path.join(os.path.dirname(__file__), "..", "references", "sources.yaml"),
     )
+    parser.add_argument("--max-workers", type=int, default=6, help="Concurrent RSS fetch workers")
     args = parser.parse_args()
 
     since_hours = args.days * 24 if args.days else args.since_hours
@@ -230,15 +233,24 @@ def main():
     failed = []
     all_items = []
 
-    for source in rss_sources:
-        items = fetch_rss(source)
-        if not items:
-            failed.append(source.get("name", "?"))
-            continue
-        # Filter by time window
-        items = [i for i in items if is_within_hours(i["published_at"], since_hours)]
-        all_items.extend(items)
-        print(f"[fetch_sources] {source['name']}: {len(items)} items", file=sys.stderr)
+    worker_count = max(1, min(args.max_workers, len(rss_sources) or 1))
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        future_to_source = {executor.submit(fetch_rss, source): source for source in rss_sources}
+        for future in as_completed(future_to_source):
+            source = future_to_source[future]
+            try:
+                items = future.result()
+            except Exception as e:
+                print(f"[fetch_sources] Error – {source.get('name', '?')}: {e}", file=sys.stderr)
+                items = []
+
+            if not items:
+                failed.append(source.get("name", "?"))
+                continue
+
+            items = [i for i in items if is_within_hours(i["published_at"], since_hours)]
+            all_items.extend(items)
+            print(f"[fetch_sources] {source['name']}: {len(items)} items", file=sys.stderr)
 
     if failed:
         print(f"[fetch_sources] Failed sources: {', '.join(failed)}", file=sys.stderr)

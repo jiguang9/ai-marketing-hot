@@ -58,12 +58,19 @@ def fetch_items(since_hours: int = 24, take: int = 100, query: str = None, mode:
 
 
 def normalize(r: dict) -> dict:
+    published_at = (
+        r.get("published_at")
+        or r.get("publishedAt")
+        or r.get("created_at")
+        or r.get("createdAt")
+        or ""
+    )
     return {
-        "title": r.get("title", "").strip(),
-        "summary": r.get("summary") or r.get("description") or "",
+        "title": (r.get("title") or r.get("titleZh") or r.get("title_cn") or "").strip(),
+        "summary": r.get("summary") or r.get("summaryZh") or r.get("summary_cn") or r.get("description") or "",
         "url": r.get("url") or r.get("link") or "",
-        "source": r.get("source") or "AI HOT",
-        "published_at": r.get("published_at") or r.get("created_at") or "",
+        "source": r.get("source") or r.get("sourceName") or r.get("source_name") or "AI HOT",
+        "published_at": published_at,
         "raw_category": r.get("category") or "",
         "marketing_categories": [],
         "matched_keywords": [],
