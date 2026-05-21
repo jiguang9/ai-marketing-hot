@@ -146,6 +146,26 @@ available now, 发布, 上线, 新工具, 新功能, 开放测试
 
 ---
 
+### social_discussion — 社媒/论坛/社区讨论热点
+
+**定义**：来自 Reddit、Hacker News、X/Twitter、LinkedIn 等平台的营销讨论帖，反映从业者真实痛点、工具口碑、实操经验和争议观点。
+
+**典型信号词**：reddit, hacker news, twitter, community, discussion, thread,
+anyone else, hot take, sharing, case study, experience with, 社区讨论, 推特, 论坛, 营销人
+
+**为什么重要**：官方源滞后，社区讨论往往是平台变化和新兴工具的第一手信号；痛点讨论帮助判断竞品动态和用户需求。
+
+**可选细分标签**（在 summary 中注明）：
+- `social_tool_buzz`：工具口碑与评价
+- `social_pain_points`：营销人当前痛点
+- `social_experiments`：实操实验与数据分享
+- `social_backlash`：争议/反噬信号
+- `social_opportunities`：机会信号
+
+**输出额外要求**：每条 social_discussion 热点必须注明"⚠️ 社区反馈，非官方验证数据"。
+
+---
+
 ## 分类优先级
 
 当一条热点可映射多个分类时，主分类按以下优先级取最高相关的：
@@ -161,3 +181,4 @@ available now, 发布, 上线, 新工具, 新功能, 开放测试
 9. `creator_influencer`
 10. `brand_campaigns`
 11. `research_insight`（参考性最低）
+12. `social_discussion`（需交叉核实，单独出现时不升至"立即关注"）

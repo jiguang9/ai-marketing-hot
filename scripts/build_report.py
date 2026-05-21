@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate Chinese Markdown marketing report from ranked items.
-Supports modes: daily, weekly, platform, opportunities.
+Supports modes: daily, weekly, platform, opportunities, social.
 """
 
 import json
@@ -70,6 +70,13 @@ def render_item(item: dict, index: int) -> str:
         lines.append("")
     lines.append(f"- **来源**：{source}　**时间**：{published}　**评分**：{score}/100")
     lines.append(f"- **分类**：{cat_str}")
+    # Social-specific fields
+    if item.get("raw_category") == "social":
+        discussion_signal = item.get("discussion_signal", "")
+        platform = item.get("platform", "")
+        community = item.get("community", "")
+        if discussion_signal:
+            lines.append(f"- **讨论信号**：{discussion_signal}（⚠️ 社区反馈，非官方验证数据）")
     lines.append(f"- **营销影响**：{impact}")
     lines.append(f"- **建议动作**：{action}")
     lines.append(f"- **适合谁**：{audience}")
@@ -266,6 +273,83 @@ def report_weekly(items: list) -> str:
     return report_daily(items, since_hours=168)
 
 
+def report_social(items: list, since_hours: int = 24) -> str:
+    social = [i for i in items if i.get("raw_category") == "social"]
+    non_social = [i for i in items if i.get("raw_category") != "social"]
+    time_label = format_time_label(since_hours)
+
+    lines = [
+        "# 社媒论坛 AI 营销讨论热点",
+        "",
+        f"**时间范围**：{time_label}　**社媒条目**：{len(social)} 条",
+        "",
+        "> ⚠️ 以下内容为社区讨论信号，不代表已验证事实。",
+        "> 涉及平台政策/算法变化时，请交叉核实官方来源后再行动。",
+        "",
+        "---",
+        "",
+    ]
+
+    if not social:
+        lines.append("当前时间窗内未抓取到社媒讨论数据。请检查 fetch_social.py 是否正常运行。")
+        return "\n".join(lines)
+
+    # Group by priority
+    urgent = [i for i in social if i.get("priority") in ("立即关注", "本周跟进")]
+    watch = [i for i in social if i.get("priority") == "保持观察"]
+
+    if urgent:
+        lines += ["## 高热度讨论", ""]
+        for idx, item in enumerate(urgent[:8], 1):
+            lines.append(render_item(item, idx))
+            lines.append("")
+
+    if watch:
+        lines += ["---", "", "## 值得关注的讨论", ""]
+        for item in watch[:4]:
+            title = item.get("title", "")
+            url = item.get("url", "")
+            community = item.get("community", item.get("source", ""))
+            eng = item.get("engagement", {})
+            hint = f"{eng.get('upvotes',0)} pts" if eng.get("upvotes") else ""
+            link = f"[{title}]({url})" if url else title
+            lines.append(f"- {link}（{community}{'・' + hint if hint else ''}）")
+        lines.append("")
+
+    # Cross-reference with non-social items on same topics
+    if non_social:
+        lines += ["---", "", "## 官方/媒体交叉验证", ""]
+        lines.append("同期官方源和行业媒体中，与社区讨论话题相关的报道：")
+        lines.append("")
+        shown = 0
+        social_keywords = set()
+        for item in social[:5]:
+            social_keywords.update(item.get("matched_keywords", []))
+        for item in non_social[:10]:
+            if any(k in (item.get("title", "") + item.get("summary", "")).lower() for k in social_keywords):
+                title = item.get("title", "")
+                url = item.get("url", "")
+                source = item.get("source", "")
+                lines.append(f"- [{title}]({url})（{source}）")
+                shown += 1
+                if shown >= 3:
+                    break
+        if not shown:
+            lines.append("- 暂无直接关联的官方来源，建议手动搜索核实。")
+        lines.append("")
+
+    lines += ["---", "", "## 讨论来源覆盖", ""]
+    from collections import Counter
+    platform_counter: Counter = Counter(i.get("platform", "?") for i in social)
+    community_counter: Counter = Counter(i.get("community", "?") for i in social)
+    lines.append(f"**平台分布**：{', '.join(f'{p}({n})' for p, n in platform_counter.most_common())}")
+    top_communities = community_counter.most_common(5)
+    lines.append(f"**活跃社区**：{', '.join(f'{c}({n})' for c, n in top_communities)}")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -273,7 +357,7 @@ def report_weekly(items: list) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Build AI marketing report")
     parser.add_argument("--input", "-i", required=True, help="Path to ranked JSON file")
-    parser.add_argument("--mode", choices=["daily", "weekly", "platform", "opportunities"], default="daily")
+    parser.add_argument("--mode", choices=["daily", "weekly", "platform", "opportunities", "social"], default="daily")
     parser.add_argument("--platform", default="", help="Platform name for platform mode")
     parser.add_argument("--since-hours", type=int, default=24, dest="since_hours")
     parser.add_argument("--output", "-o", default=None, help="Output file (default: stdout)")
@@ -295,6 +379,8 @@ def main():
             print("[build_report] --platform required for platform mode", file=sys.stderr)
             sys.exit(1)
         report = report_platform(items, args.platform, args.since_hours)
+    elif args.mode == "social":
+        report = report_social(items, args.since_hours)
     else:
         report = report_daily(items, args.since_hours)
 

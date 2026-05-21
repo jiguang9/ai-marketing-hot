@@ -78,6 +78,12 @@ CATEGORY_KEYWORDS: dict[str, list[str]] = {
         "api", "integration", "plugin", "update", "now available", "general availability",
         "发布", "上线", "新工具", "新功能", "工具", "beta", "开放",
     ],
+    "social_discussion": [
+        "reddit", "hacker news", "hn", "twitter", "x.com", "community",
+        "discussion", "thread", "poll", "asking", "anyone else", "hot take",
+        "unpopular opinion", "case study", "sharing", "experience with",
+        "社区讨论", "推特", "论坛", "帖子", "营销人",
+    ],
 }
 
 # Platform tier for scoring
@@ -107,7 +113,8 @@ IMPACT_TEMPLATES: dict[str, str] = {
     "brand_campaigns": "品牌侧案例，可参考借鉴其创意策略和投放组合",
     "creator_influencer": "影响达人/创作者合作方式，关注新兴平台和内容形式",
     "research_insight": "消费者洞察和行业趋势，用于支撑策略决策",
-    "tools_launches": "新工具发布，评估是否能提升现有工作流效率",
+    "tools_launches":    "新工具发布，评估是否能提升现有工作流效率",
+    "social_discussion": "来自营销社区的真实反馈与讨论，反映从业者对工具/策略的实际看法",
 }
 
 AUDIENCE_MAP: dict[str, str] = {
@@ -122,6 +129,7 @@ AUDIENCE_MAP: dict[str, str] = {
     "creator_influencer":"品牌方、电商团队、社媒团队",
     "research_insight":  "营销总监、策略团队、CMO",
     "tools_launches":    "所有营销团队",
+    "social_discussion": "营销总监、策略团队、品牌方",
 }
 
 ACTION_TEMPLATES: dict[str, str] = {
@@ -135,7 +143,8 @@ ACTION_TEMPLATES: dict[str, str] = {
     "brand_campaigns": "提炼可复用的创意方法论，应用到下一个 campaign",
     "creator_influencer": "更新达人合作标准和内容 brief，适配新平台规则",
     "research_insight": "将关键数据纳入季度策略规划，更新用户画像",
-    "tools_launches": "申请 beta 资格或安排产品演示，评估 ROI",
+    "tools_launches":    "申请 beta 资格或安排产品演示，评估 ROI",
+    "social_discussion": "记录社区反馈，与内部数据交叉验证，评估是否值得跟进或官方交叉核实",
 }
 
 
@@ -217,6 +226,18 @@ MARKETING_SIGNAL_KW = {
 }
 
 
+def score_social_engagement(item: dict) -> int:
+    """Engagement bonus (0-20) for social items based on upvotes + comments."""
+    if item.get("raw_category") != "social":
+        return 0
+    eng = item.get("engagement", {})
+    upvotes = eng.get("upvotes", 0) or 0
+    comments = eng.get("comments", 0) or 0
+    # Normalize: 200 upvotes or 50 comments → max bonus
+    raw = min(upvotes / 200 + comments / 50, 1.0)
+    return int(raw * 20)
+
+
 def compute_score(item: dict) -> int:
     content = (item.get("title", "") + " " + item.get("summary", "")).lower()
     source = item.get("source", "")
@@ -228,10 +249,10 @@ def compute_score(item: dict) -> int:
         + score_action_window(content)
         + score_freshness(item.get("published_at", ""))
         + score_credibility(url)
+        + score_social_engagement(item)
     )
 
     # Marketing relevance gate: cap non-marketing content at 低优先级 (≤39)
-    # regardless of platform prestige, freshness, or credibility.
     if not any(k in content for k in MARKETING_SIGNAL_KW):
         return min(total, 39)
 
