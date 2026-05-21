@@ -184,6 +184,25 @@ def score_credibility(url: str) -> int:
     return 5
 
 
+# Keywords that indicate genuine marketing relevance.
+# An item with NONE of these is not marketing-related regardless of source prestige.
+# Intentionally excludes ultra-generic terms (launch, update, release) that appear in any tech news.
+MARKETING_SIGNAL_KW = {
+    "ads", "advertising", "seo", "aeo", "geo", "llmo", "roas", "attribution",
+    "bidding", "conversion", "cpm", "cpc", "ctr", "programmatic", "retargeting",
+    "remarketing", "lead generation", "performance max", "smart bidding",
+    "content marketing", "copywriting", "brand", "campaign", "influencer",
+    "creator economy", "ugc", "kol", "koc", "live shopping", "live streaming",
+    "ecommerce", "e-commerce", "shopify", "tiktok shop", "social commerce",
+    "social media", "instagram", "tiktok", "marketing", "martech", "crm",
+    "personalization", "email marketing", "hubspot", "salesforce", "klaviyo",
+    "commerce", "retail", "consumer", "audience",
+    # Chinese
+    "广告", "营销", "品牌", "转化", "电商", "社媒", "内容营销", "投放",
+    "增长", "私域", "出海", "达人", "直播", "带货", "用户运营",
+}
+
+
 def compute_score(item: dict) -> int:
     content = (item.get("title", "") + " " + item.get("summary", "")).lower()
     source = item.get("source", "")
@@ -196,6 +215,12 @@ def compute_score(item: dict) -> int:
         + score_freshness(item.get("published_at", ""))
         + score_credibility(url)
     )
+
+    # Marketing relevance gate: cap non-marketing content at 低优先级 (≤39)
+    # regardless of platform prestige, freshness, or credibility.
+    if not any(k in content for k in MARKETING_SIGNAL_KW):
+        return min(total, 39)
+
     return min(total, 100)
 
 

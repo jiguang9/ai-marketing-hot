@@ -72,7 +72,7 @@ sources:
     enabled: true
     priority: 2
     categories: [content_creative, crm_martech, seo_aeo, research_insight]
-    notes: "验证可用，响应正常"
+    notes: "验证可用，但响应较慢（实测约 2-3 分钟）；全局超时 30s 内可能被跳过，用 --timeout 60 可保留"
 
   - name: "Shopify Blog"
     type: rss

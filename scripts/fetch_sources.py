@@ -16,7 +16,9 @@ from urllib.error import URLError, HTTPError
 from datetime import datetime, timezone, timedelta
 from xml.etree import ElementTree as ET
 from email.utils import parsedate_to_datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+import time
+from queue import Queue, Empty
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -214,32 +216,53 @@ def fetch_rss(source: dict) -> list:
 
 
 # ---------------------------------------------------------------------------
-# Concurrent fetch
+# Concurrent fetch with daemon threads (process exits cleanly after timeout)
 # ---------------------------------------------------------------------------
 
-def fetch_all(rss_sources: list, since_hours: int, max_workers: int) -> tuple:
+def fetch_all(rss_sources: list, since_hours: int, max_workers: int, global_timeout: int = 30) -> tuple:
+    result_queue: Queue = Queue()
+    semaphore = threading.Semaphore(max_workers)
+
+    def worker(source):
+        semaphore.acquire()
+        try:
+            items = fetch_rss(source)
+            result_queue.put((source.get("name", "?"), items))
+        finally:
+            semaphore.release()
+
+    for source in rss_sources:
+        t = threading.Thread(target=worker, args=(source,), daemon=True)
+        t.start()
+
     all_items = []
     failed = []
+    collected: set = set()
+    deadline = time.monotonic() + global_timeout
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_source = {executor.submit(fetch_rss, s): s for s in rss_sources}
-        for future in as_completed(future_to_source):
-            source = future_to_source[future]
-            name = source.get("name", "?")
-            try:
-                items = future.result()
-            except Exception as e:
-                print(f"[fetch_sources] Unexpected error – {name}: {e}", file=sys.stderr)
+    while len(collected) < len(rss_sources):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            name, items = result_queue.get(timeout=min(remaining, 0.5))
+            collected.add(name)
+            if items:
+                filtered = [i for i in items if is_within_hours(i["published_at"], since_hours)]
+                all_items.extend(filtered)
+                print(f"[fetch_sources] {name}: {len(filtered)} items", file=sys.stderr)
+            else:
                 failed.append(name)
-                continue
+        except Empty:
+            pass
 
-            if not items:
-                failed.append(name)
-                continue
-
-            items = [i for i in items if is_within_hours(i["published_at"], since_hours)]
-            all_items.extend(items)
-            print(f"[fetch_sources] {name}: {len(items)} items", file=sys.stderr)
+    timed_out = [s.get("name", "?") for s in rss_sources if s.get("name", "?") not in collected]
+    if timed_out:
+        print(
+            f"[fetch_sources] Global timeout ({global_timeout}s) – skipping: {', '.join(timed_out)}",
+            file=sys.stderr,
+        )
+        failed.extend(timed_out)
 
     return all_items, failed
 
@@ -253,6 +276,8 @@ def main():
     parser.add_argument("--since-hours", type=int, default=24, dest="since_hours")
     parser.add_argument("--days", type=int, default=None)
     parser.add_argument("--max-workers", type=int, default=6, dest="max_workers")
+    parser.add_argument("--timeout", type=int, default=30, dest="global_timeout",
+                        help="Global timeout in seconds for all RSS fetches (default: 30)")
     parser.add_argument(
         "--sources-file",
         default=os.path.join(os.path.dirname(__file__), "..", "references", "sources.yaml"),
@@ -270,7 +295,7 @@ def main():
         return
 
     rss_sources = [s for s in all_sources if s.get("type") == "rss" and s.get("enabled", True)]
-    all_items, failed = fetch_all(rss_sources, since_hours, args.max_workers)
+    all_items, failed = fetch_all(rss_sources, since_hours, args.max_workers, args.global_timeout)
 
     if failed:
         print(f"[fetch_sources] Failed sources: {', '.join(failed)}", file=sys.stderr)
