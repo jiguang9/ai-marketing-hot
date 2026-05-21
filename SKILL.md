@@ -41,7 +41,7 @@ python scripts/fetch_aihot.py --since-hours 24 --take 100 > /tmp/aihot_raw.json
 python scripts/fetch_sources.py --since-hours 24 > /tmp/sources_raw.json
 
 # 合并两个 JSON 数组，去重、分类、评分
-python scripts/rank_items.py /tmp/aihot_raw.json /tmp/sources_raw.json > /tmp/ranked.json
+python scripts/rank_items.py /tmp/aihot_raw.json /tmp/sources_raw.json --min-score 40 > /tmp/ranked.json
 
 # 生成中文营销简报
 python scripts/build_report.py --input /tmp/ranked.json --mode daily
@@ -51,7 +51,7 @@ python scripts/build_report.py --input /tmp/ranked.json --mode daily
 ```bash
 python scripts/fetch_aihot.py --since-hours 168 --query "Google Ads" > /tmp/aihot_raw.json
 python scripts/fetch_sources.py --since-hours 168 > /tmp/sources_raw.json
-python scripts/rank_items.py /tmp/aihot_raw.json /tmp/sources_raw.json > /tmp/ranked.json
+python scripts/rank_items.py /tmp/aihot_raw.json /tmp/sources_raw.json --min-score 40 > /tmp/ranked.json
 python scripts/build_report.py --input /tmp/ranked.json --mode platform --platform "Google"
 ```
 
