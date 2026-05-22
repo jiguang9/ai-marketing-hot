@@ -10,13 +10,15 @@
 - **Daemon 线程超时**：`fetch_sources.py` 和 `fetch_social.py` 用 `threading.Thread(daemon=True)` + Queue 实现并发，配合全局超时（默认 30s）优雅退出。不用 `ThreadPoolExecutor`（非 daemon 线程会卡住进程）。
 - **营销相关性门槛**：`rank_items.py` 的 `compute_score()` 有 `MARKETING_SIGNAL_KW` 门槛——没有命中任何营销关键词的条目评分强制 ≤39（低优先级，不出现在报告中）。这是防噪声的核心机制，不要删除。
 - **RSS 可用性**：`references/sources.yaml` 中 `enabled: false` 的源经过真实验证（2026-05-22）均为 404/403/HTML，不要轻易改回 true。
+- **install.sh 行为**：只复制 skill 运行必需文件（SKILL.md、agents/、scripts/、references/），不复制 .git / README.md / CLAUDE.md。严格参数解析：只接受 `[TARGET_DIR] [--verify]`，多余参数报错。默认无联网；`--verify` 用 Python `subprocess.run(timeout=10)` 实现跨平台 10 秒超时，失败不阻塞安装。
+- **UI 显示名**：`agents/openai.yaml` 的 `display_name` 为 `"AI Marketing Hot"`（英文），skill 调用名仍为 `ai-marketing-hot`。
 
 ## 目录说明
 
 ```
 SKILL.md          ← Agent 读取的核心文件，改动需谨慎
 CLAUDE.md         ← 本文件，给 Claude Code 自己看
-install.sh        ← 本地安装脚本，有防呆验证
+install.sh        ← 本地安装脚本；严格参数；默认无联网；--verify 可选（10s 超时）
 agents/           ← Agent 框架兼容配置
 scripts/          ← 可独立运行的 Python 脚本
 references/       ← 人类可读的配置和规则文档

@@ -13,11 +13,13 @@ AI 营销热点 Skill，适用于 Claude Code、Codex、OpenClaw、Hermes 等 Ag
 ```sh
 git clone https://github.com/jiguang9/ai-marketing-hot
 cd ai-marketing-hot
-sh install.sh                    # 安装到 ~/.codex/skills/ai-marketing-hot
-sh install.sh ~/my/skills/path   # 或指定目录
+sh install.sh                          # 安装到 ~/.codex/skills/ai-marketing-hot
+sh install.sh ~/my/skills/path         # 或指定目录
+sh install.sh --verify                 # 安装后附加联网验证（可选，10 秒超时）
+sh install.sh ~/my/skills/path --verify
 ```
 
-安装后向 Agent 说：`帮我安装这个 skill：https://github.com/jiguang9/ai-marketing-hot`
+安装只复制必需文件（SKILL.md、agents/、scripts/、references/），不包含 .git、README.md、CLAUDE.md。默认不执行联网请求；加 `--verify` 后抓取 1 条数据验证，失败不阻塞安装。
 
 ---
 
@@ -99,4 +101,4 @@ python scripts/build_report.py --input /tmp/ranked.json --mode daily
 
 ## 版本
 
-v1.2 — 见 [SKILL.md](SKILL.md) 中的 version 字段
+v1.2 — 见 [SKILL.md](SKILL.md) 中的 version 字段（install.sh 已更新至严格参数解析 + 跨平台 10 秒超时验证）
