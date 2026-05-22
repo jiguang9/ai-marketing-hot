@@ -1,5 +1,5 @@
 interface:
-  display_name: "AI 营销热点"
+  display_name: "AI Marketing Hot"
   short_description: "把 AI 动态转成营销团队行动建议"
   default_prompt: "Use $ai-marketing-hot to summarize today's AI marketing opportunities in Chinese."
 
