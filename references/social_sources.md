@@ -6,13 +6,18 @@
 
 ## 已实现（V1）
 
-### Reddit（公开 JSON API）
+### Reddit
 
-**接入方式**：`https://www.reddit.com/r/{subreddit}/hot.json?limit=50`
-**当前状态**：⚠️ 403 Blocked — Reddit 自 2023 年起封锁了未认证 API 访问。
-V2 需通过 OAuth 接入（免费 Script App，每分钟 100 请求）。
-**鉴权**：V1 无（因此 403），V2 需 Reddit Script OAuth
-**速率限制**：OAuth 模式约 100 req/min
+**接入策略（三档）**：
+1. 首选：Reddit 官方 API + OAuth（免费 Script App）
+   - 环境变量：`REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` / `REDDIT_USER_AGENT`
+   - 速率上限：100 req/min
+   - 申请地址：https://www.reddit.com/prefs/apps
+2. 次选：Agent 联网时通过搜索引擎获取 Reddit 公开帖索引
+3. 备选：第三方 Reddit RSS/镜像，不作为稳定依赖
+
+**无 OAuth 时的行为**：跳过 Reddit 抓取，内部记录 warning，不向用户展示错误信息。
+输出中只写："公开社区讨论覆盖有限" 或 "Reddit 仅覆盖搜索引擎可索引的公开讨论"
 
 **监控社区**：
 
@@ -29,8 +34,6 @@ V2 需通过 OAuth 接入（免费 Script App，每分钟 100 请求）。
 | r/DigitalMarketing | 数字营销工具和策略 |
 | r/socialmedia | 社媒运营、平台动态 |
 
-**过滤规则**：帖子 title + selftext 中必须包含营销相关关键词（见 `fetch_social.py` MARKETING_FILTER_KW）
-
 ---
 
 ### Hacker News（Algolia 搜索 API）
@@ -38,6 +41,7 @@ V2 需通过 OAuth 接入（免费 Script App，每分钟 100 请求）。
 **接入方式**：`https://hn.algolia.com/api/v1/search?query={q}&tags=story&numericFilters=created_at_i>{ts}`
 **鉴权**：无
 **速率限制**：宽松（官方未明确）
+**当前状态**：✅ 稳定可用
 
 **搜索查询词**：
 - `AI marketing`
@@ -100,12 +104,25 @@ TikTok Shop AI, ChatGPT shopping, Perplexity ads, AI UGC, AI outbound
 
 | 来源 | V1 状态 | 类型 | 营销价值 |
 |---|---|---|---|
-| Reddit | ⚠️ 403 阻断 | 公开 API（V2 改 OAuth）| 实操经验、痛点、工具口碑 |
+| Reddit | 需 OAuth（环境变量配置后可用）| 官方 API | 实操经验、痛点、工具口碑 |
 | Hacker News | ✅ 已实现 | 公开 API | 技术讨论、工具评测 |
-| X / Twitter | ❌ 未实现 | 付费 API | 从业者实时观点（高价值） |
+| X / Twitter | ❌ 未实现 | 付费 API | 从业者实时观点（高价值）|
 | Product Hunt | ❌ 未实现 | 需 API key | 新工具发现 |
 | LinkedIn | ❌ 未实现 | 无公开 API | B2B 视角 |
 | Indie Hackers | ❌ 未实现 | 无 API | 增长实验 |
+
+---
+
+## 无数据时的输出指引
+
+以下情况只写用户可理解的覆盖说明，不写内部技术原因：
+
+| 实际原因 | 用户可见说明 |
+|---|---|
+| Reddit OAuth 未配置 | "公开社区讨论覆盖有限" |
+| X/Twitter API 未接入 | "X/Twitter 覆盖有限" |
+| HN 无相关结果 | "本周技术社区暂无高相关讨论" |
+| 所有社媒源失败 | "本次未纳入足够高相关的公开社区讨论" |
 
 ---
 
@@ -114,4 +131,4 @@ TikTok Shop AI, ChatGPT shopping, Perplexity ads, AI UGC, AI outbound
 1. Reddit 和 HN 内容为匿名/半匿名用户发帖，可信度低于官方源
 2. 单条高票帖不代表行业趋势，需结合多条相似讨论判断
 3. 营销类帖子中存在工具推广/软广，注意识别
-4. 时效性：`/hot` 端点返回的是热度排序，不完全等于时间排序
+4. Reddit 内容是社区反馈，不等同于官方事实；涉及广告政策、平台功能、算法变化时，必须优先用官方源交叉验证
