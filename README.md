@@ -102,3 +102,9 @@ python scripts/build_report.py --input /tmp/ranked.json --mode daily
 ## 版本
 
 v1.2 — 见 [SKILL.md](SKILL.md) 中的 version 字段（install.sh 已更新至严格参数解析 + 跨平台 10 秒超时验证）
+
+---
+
+## License
+
+[MIT](LICENSE)
